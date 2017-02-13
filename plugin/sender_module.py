@@ -11,16 +11,20 @@ import sys
 import os
 import imp
 
-module_path = "/Users/yukito/prog/myBurpPlugin/plugin/module/"
+module_path = "your module path"
 
 class moduleImporter(object):
    def __init__(self):
       self.module_code = ""
 
    def find_module(self, fullname, path=None):
-      with open(module_path + fullname + ".py") as fp:
-         self.module_code = fp.read()
-      return self
+      dist_files = os.listdir(module_path)
+      if fullname in dist_files or fullname + ".py" in dist_files:
+         with open(module_path + fullname + ".py") as fp:
+            self.module_code = fp.read()
+         return self
+      else:
+         return None
 
    def load_module(self, name):
       module = imp.new_module(name)
@@ -30,6 +34,18 @@ class moduleImporter(object):
 
 
 class BurpExtender(IBurpExtender, IProxyListener):
+
+   def exec_module(self, messageIsRequest = 0, message = None):
+      sys.meta_path = [moduleImporter()]
+      modules = os.listdir(module_path)
+      for module in modules:
+         if module[-3:] == ".py":
+            module_name = module[:-3]
+         else:
+            module_name = module
+         exec("import " + module_name)
+         sys.modules[module_name].run(messageIsRequest, message)
+
    def registerExtenderCallbacks(self, callbacks):
       self._callbacks = callbacks
       self._helpers = callbacks.getHelpers()
@@ -39,11 +55,6 @@ class BurpExtender(IBurpExtender, IProxyListener):
       return
 
    def processProxyMessage(self, messageIsRequest, message):
-      sys.meta_path = [moduleImporter()]
-      modules = os.listdir(module_path)
-      for module in modules:
-         exec("import " + module[:-3])
-         print sys.modules[module[:-3]].run()
-      sys.meta_path = []
+      self.exec_module(messageIsRequest, message)
       if messageIsRequest:
          print self._helpers.bytesToString(message.getMessageInfo().getRequest())
