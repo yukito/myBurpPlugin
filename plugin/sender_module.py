@@ -6,21 +6,18 @@ from burp import IHttpRequestResponse
 
 from java.util import List, ArrayList
 
-import json
-import sys
-import os
-import imp
+import sys, os, imp
 
-module_path = "your module path"
+module_path = "your path"
 
 class moduleImporter(object):
    def __init__(self):
       self.module_code = ""
 
    def find_module(self, fullname, path=None):
-      dist_files = os.listdir(module_path)
-      if fullname in dist_files or fullname + ".py" in dist_files:
-         with open(module_path + fullname + ".py") as fp:
+      fullpath = module_path + fullname if fullname[-3:] == ".py" else module_path + fullname + ".py"
+      if os.path.exists(fullpath):
+         with open(fullpath, "r") as fp:
             self.module_code = fp.read()
          return self
       else:
@@ -39,10 +36,7 @@ class BurpExtender(IBurpExtender, IProxyListener):
       sys.meta_path = [moduleImporter()]
       modules = os.listdir(module_path)
       for module in modules:
-         if module[-3:] == ".py":
-            module_name = module[:-3]
-         else:
-            module_name = module
+         module_name = module[:-3] if module[-3:] == ".py" else module
          exec("import " + module_name)
          sys.modules[module_name].run(messageIsRequest, message)
 
