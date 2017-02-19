@@ -9,7 +9,7 @@ from java.util import List, ArrayList
 
 from javax.swing import (JPanel, JTable, JButton, JTextField, JLabel, JScrollPane, JMenuItem, JCheckBox, JFileChooser)
 from javax.swing.table import DefaultTableModel
-from java.awt import (GridBagLayout, GridBagConstraints)
+from java.awt import (GridBagLayout, GridBagConstraints, Dimension)
 from java.awt.event import ActionListener
 import java
 
@@ -62,8 +62,7 @@ class BurpExtender(IBurpExtender, ITab, IProxyListener):
 
 
       self.tab = JPanel(GridBagLayout())
-      self.tableData = [
-      ]
+      self.tableData = []
       colNames = ('Enabled','Module')
       self.dataModel = MyTableModel(self.tableData, colNames)
       self.table = JTable(self.dataModel)
@@ -71,31 +70,54 @@ class BurpExtender(IBurpExtender, ITab, IProxyListener):
       c = GridBagConstraints()
       c.anchor = GridBagConstraints.FIRST_LINE_START
       c.gridx = 0 
-      c.gridy = 1 
+      c.gridy = 4 
       c.gridheight = 6 
       c.gridwidth = 6
-      c.weightx = 0.3 
+      c.weightx = 0.6 
       c.weighty = 0.5 
       self.tab.add(self.tablecont, c)
 
       self.fc = JFileChooser()
       self.fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY)
 
+      label_for_openDirectory = JLabel("Module Importer")
       c = GridBagConstraints()
-      c.gridx = 1 
-      c.gridy = 0 
-      self.openButton = JButton("Open Directory", actionPerformed = self.openDialog)
-      self.tab.add(self.openButton, c)
-
-      c = GridBagConstraints()
+      c.anchor = GridBagConstraints.FIRST_LINE_START
       c.gridx = 0 
       c.gridy = 0 
+      self.tab.add(label_for_openDirectory, c)
+
+      label_plugin_desc = JLabel("This module makes your development of Burp Suite Plugin easier.")
+      label_plugin_desc.setPreferredSize(Dimension(400, 50))
+      c = GridBagConstraints()
+      c.gridx = 0 
+      c.gridy = 1 
+      self.tab.add(label_plugin_desc, c)
+
+      label_for_openDirectory = JLabel("Module Path:")
+      c = GridBagConstraints()
+      c.anchor = GridBagConstraints.FIRST_LINE_START
+      c.gridx = 0 
+      c.gridy = 2 
+      self.tab.add(label_for_openDirectory, c)
+
+      c = GridBagConstraints()
+      c.anchor = GridBagConstraints.FIRST_LINE_START
+      c.gridx = 0 
+      c.gridy = 3 
       self.input_id = JTextField(40)
       self.tab.add(self.input_id, c)
 
-      callbacks.customizeUiComponent(self.tab)
-      callbacks.customizeUiComponent(self.table)
-      callbacks.customizeUiComponent(self.tablecont)
+      c = GridBagConstraints()
+      c.anchor = GridBagConstraints.FIRST_LINE_START
+      c.gridx = 1 
+      c.gridy = 3 
+      self.openButton = JButton("Open Directory", actionPerformed = self.openDialog)
+      self.tab.add(self.openButton, c)
+
+      #callbacks.customizeUiComponent(self.tab)
+      #callbacks.customizeUiComponent(self.table)
+      #callbacks.customizeUiComponent(self.tablecont)
       callbacks.addSuiteTab(self)
 
 
